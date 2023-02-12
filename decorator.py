@@ -1,11 +1,13 @@
-from allure import step
-import pytest
 import functools
-from selenium.webdriver import Edge
+
+import pytest
+from allure import step
 from selene.support.shared import browser
+from selenium.webdriver import Edge
+
 
 @pytest.fixture
-def open_demo():
+def setup_browser():
     # browser.set_driver(Edge())
     browser.config.driver = Edge()
     browser.config.window_height = 800
@@ -21,8 +23,8 @@ def handle_test_with_allure(func):
     def wrapper_func(*args, **kwargs):
         with step(func.__name__):
             func(*args, **kwargs)
-    return wrapper_func
 
+    return wrapper_func
 
 # @allure.tag('web')
 # @allure.label('owner', 'Mimalen')

@@ -1,47 +1,78 @@
 import os
-from allure import severity, story, link, feature, label, tag
+import time
+
+from allure import severity, story, link, feature, label, tag, step
 from allure_commons.types import Severity
-import pytest
 from selene.support.conditions import be, have
-from decorator import handle_test_with_allure, open_demo
+from decorator import setup_browser
 
-@handle_test_with_allure
-def test_name(open_demo):
-    open_demo.element('#firstName').should(be.blank).type('Jul')
-    open_demo.element('#firstName').should(have.value('Jul'))
-    open_demo.element('#lastName').should(be.blank).type('Krv')
-    open_demo.element('#lastName').should(have.value('Krv'))
 
-@handle_test_with_allure
-def test_email(open_demo):
-    open_demo.element('#userEmail').should(be.blank).type('julkrv@test.co')
-    open_demo.element('#userEmail').should(have.value('julkrv@test.co'))
+def fill_form(browser, data):
+    ids = list(data.keys())
+    values = list(data.values())
+    for i in range(len(ids)):
+        browser.element(ids[i]).should(be.blank).type(values[i])
+    browser.element('label[for=gender-radio-2]').click()
+    browser.element('#dateOfBirthInput').click()
+    browser.element('.react-datepicker__month-select').type('June')
+    browser.element('.react-datepicker__year-select').type('1999')
+    browser.element('.react-datepicker__day--015').click()
+    browser.element('label[for=hobbies-checkbox-1]').click()
+    browser.element('label[for=hobbies-checkbox-2]').click()
+    browser.element('#uploadPicture') \
+        .set_value(
+        os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__),
+                'merry.jpg'
+            )
+        )
+    )
+    browser.element('')
+    browser.element('#react-select-3-input').type('NCR').press_enter()
+    browser.element('#react-select-4-input').type('Noida').press_enter()
+    browser.element('#submit').press_enter()
 
-@handle_test_with_allure
-def test_gender(open_demo):
-    open_demo.element('label[for=gender-radio-2]').click()
-    open_demo.element('label[for=gender-radio-2]').should(be.enabled)
-
-@handle_test_with_allure
-def test_mobile(open_demo):
-    open_demo.element('#userNumber').should(be.blank).type('1234567890')
-    open_demo.element('#userNumber').should(have.value('1234567890'))
-
-@handle_test_with_allure
-def test_birth_date(open_demo):
-    open_demo.element('#dateOfBirthInput').click()
-    open_demo.element('.react-datepicker__month-select').type('June')
-    open_demo.element('.react-datepicker__year-select').type('1999')
-    open_demo.element('.react-datepicker__day--015').click()
-    open_demo.element('#dateOfBirthInput').should(have.value('15 Jun 1999'))
+def validate_form(browser, *args):
+    browser.element('.table').all('td').even.should(have.texts(args))
 
 @tag('web')
 @label('owner', 'Mimalen')
 @severity(Severity.NORMAL)
-@feature('Fill the form')
+@feature('Filling the form')
 @story('Selene')
 @link('https://demoqa.com/automation-practice-form', name='test')
-@handle_test_with_allure
-def test_subjects(open_demo):
-    open_demo.element('#subjectsInput').should(be.blank).type('qwerty')
-    open_demo.element('#subjectsInput').should(have.value('qwerty'))
+def test_submitting_form(setup_browser):
+    datum = {
+        '#firstName': 'Jul',
+        '#lastName': 'Krv',
+        '#userEmail': 'julkrv@test.co',
+        '#userNumber': '1234567890',
+        '#subjectsInput': 'qwerty',
+        '#currentAddress': 'Pushkin street, Kolotushkin building, 123 apt'
+    }
+
+    with step("Заполнение формы регистрации"):
+        fill_form(setup_browser, datum)
+
+
+    with step('Валидация заполнения'):
+        validate_form(
+            setup_browser,
+            full_name(datum),
+            datum['#userEmail'],
+            'Female',
+            '1234567890',
+            '15 June,1999',
+            '',
+            'Sports, Reading',
+            'merry.jpg',
+            'Pushkin street, Kolotushkin building, 123 apt',
+            'NCR Noida'
+        )
+
+    setup_browser.quit()
+
+
+def full_name(data):
+    return f"{data['#firstName']} {data['#lastName']}"

@@ -1,2 +1,2 @@
 py.test --alluredir=./allure_report ./test.py
-allure server ./allure_report
+allure serve ./allure_report
