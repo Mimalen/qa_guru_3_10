@@ -38,21 +38,3 @@ def handle_test_with_allure(func):
 
     return wrapper_func
 
-# @allure.tag('web')
-# @allure.label('owner', 'Mimalen')
-# @allure.severity(Severity.NORMAL)
-# @allure.feature('Check the task')
-# @allure.story('Decorator')
-# @allure.link('https://demoqa.com/automation-practice-form', name='test_decorator')
-# def test_decorator():
-#     browser.config.driver = Edge()
-#     open_main_page()
-#     search_repository('eroshenkoam/allure-example')
-#     open_repository('eroshenkoam/allure-example')
-#     open_issue()
-#     check_repository('#76')
-#
-#
-# @allure.step('Open the main page')
-# def open_main_page():
-#     browser.open('https://github.com/')
